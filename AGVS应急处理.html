@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>故障词典模糊搜索</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .error {
+            color: #d32f2f;
+            padding: 10px;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>故障词典模糊搜索</h1>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="请输入系统异常问题报错描述...">
+    </div>
+    <div id="results"></div>
+
+    <script>
+        // 表格数据（D列和H列对应关系）
+        const tableData = [
+            { d: "AGV不在任务下发点位", h: "1.拧钥匙打到手动MANUAL2.把车推到地图点地码，AGV语音提示\"地码已识别\"；\n3.拧钥匙打到AUTO；4.按RESET键复位" },
+            { d: "AGV无法执行AGVS下发任务", h: "1.拧钥匙打到手动MANUAL2.把车推到地图点地码，AGV语音提示\"地码已识别\"；\n3.拧钥匙打到AUTO；4.按RESET键复位" },
+            { d: "安全回路激光触发", h: "1.检查激光头下激光提示灯颜色和AGV的状态\n①绿色状态,AGV未偏离地码，按RESET键复位\n②绿色状态,AGV偏离地码,拧钥匙打到手动MANUAL.把车推到地图点地码，AGV语音提示\"地码已识别\".拧钥匙打到AUTO.按RESET键复位\n③红色状态，拧钥匙打到手动MANUAL，把车推到地图点地码，AGV语音提示\"地码已识别\"，拧钥匙打到AUTO，将AGV按关机旋钮打到OFF,再打到ON重启AGV,按RESET键复位重新上线\n2.若一直还是触发，联系HIK检测相关硬件链路" },
+            { d: "背货未识别", h: "1.如因碰撞导致，将AGV打成手动，调整托盘方向摆正，将AGV人工介入下放托盘，挪动AGV识别地码重新上线，AGV自动举升恢复执行任务（如碰撞严重方式1无效需将AGV按关机旋钮打到OFF,再打到ON重启AGV；如堵车严重推至空闲线路点位故障下线AGV后再处理）\n2.排查货架二维码是否丢失、损坏，如有丢失、损坏联系HIK更换\n3.如不能立即修复，故障换车处理,联系HIK查看上摄像头（紧急零件任务强制完成手动供线）" },
+            { d: "CE手动模式", h: "将AGV推到地码后需要拧钥匙打到AUTO之后按RESET键复位" },
+            { d: "货架摆歪", h: "摆正货架位置" },
+            { d: "货架调整次数过多", h: "检查货架与车体之间的偏差是否过大，调整货架位置" },
+            { d: "货架偏角过大", h: "调整货架和小车位置\n1.将AGV打成手动，调整托盘方向摆正，将AGV人工介入下放托盘，挪动AGV识别地码重新上线，AGV自动举升恢复执行任务（如碰撞严重方式1无效需将AGV按关机旋钮打到OFF,再打到ON重启AGV；如堵车严重推至空闲线路点位处理）\n2.如不能立即修复，故障换车处理.联系HIK查看（紧急零件任务强制完成手动供线）" },
+            { d: "货架未识别", h: "1.排查货架位置以及货架二维码是否丢失或损坏\n①.货架位置不正确，将货架摆正\n②.货架二维码是否丢失或损坏，HIK更换补码即可\n2.当线旁返空料架始终无法识别\n①.启用故障换车,取消换车任务，解绑料架\n②.将AGV人工介入.顶起料架,送往DP\n③.联系海康.让相关人员去DP点等待\n④.交给海康查看AGV和料架,解决问题\n⑤.待海康处理完后将料架绑定DP无任务地码上.AGV重新上线或HIK下线维修\n3.当DP供线料架始终无法识别\n①将AGV人工介入顶起料架.推送至线旁点位\n②联系海康去往线旁等待处理故障车\n③在线旁选择线边作业点做故障换车\n④新车到达换车点位后,识别料架等待完成举升下落代表任务完成" },
+            { d: "货架不匹配", h: "排查货架二维码编号以及AGVS下发的货架号\n①.如货架码贴错，联系HIK重新粘贴货架码\n②.如放置货架错误，联系现场人员将正确料架放到地码上" },
+            { d: "货架位置偏移", h: "将AGV打成手动，调整托盘方向摆正，将AGV人工介入下放托盘,挪动AGV识别地码重新上线，AGV自动举升恢复执行任务（如堵车严重推至空闲线路点位将AGV故障下线后处理）" },
+            { d: "急停警告", h: "检查AGV状态\n①.如AGV未偏离路径地码，拔起急停按钮，按RESET键复位\n②.如AGV偏离路径地码，拔起急停按钮，按RESET键复位，拧钥匙打到手动MANUAL.把车推到地图点地码，AGV语音提示\"地码已识别\".拧钥匙打到AUTO.按RESET键复位" },
+            { d: "检测到障碍物", h: "判断AGV是否检测到障碍物\n①.如AGV旁有障碍物，将障碍物移开\n②.如AGV旁无明显障碍物，联系HIK查询激光日志，查看障碍物所在位置同时排查AGV激光头是否故障\n③.如AGV故障未能快速处理，对AGV做故障换车，联系HIK处理故障车" },
+            { d: "轮打滑", h: "1.确认是否存在地面打滑的情况；\n2.拧钥匙打到手动MANUAL，推到地码后需要拧钥匙打到AUTO之后按RESET键复位" },
+            { d: "平台失联", h: "1.单台AGV持续失联无法恢复，尝试断电重启（Level 1）\n2.所有AGV都出现离线情况，确认网络环境、MQTT服务是否正常开启（IT helpdesk & Level 2）\n3.对于出现平台失联频繁的AGV需要检查wifi模块是否正常（Level 2）" },
+            { d: "碰撞条触发", h: "检查AGV状态\n①.如AGV未偏离路径地码，按RESET键复位\n②.如AGV偏离路径地码，拧钥匙打到手动MANUAL.按RESET键复位，把车推到地图点地码，AGV语音提示\"地码已识别\".拧钥匙打到AUTO.按RESET键复位\n③.如报障无法恢复，对AGV做故障换车，联系HIK处理故障车" },
+            { d: "RESET未复位", h: "检查AGV状态\n①.如AGV未偏离路径地码，按RESET键复位\n②.如AGV偏离路径地码，拧钥匙打到手动MANUAL.按RESET键复位，把车推到地图点地码，AGV语音提示\"地码已识别\".拧钥匙打到AUTO.按RESET键复位\n③.如报障无法恢复，对AGV做故障换车，联系HIK处理故障车" },
+            { d: "调整货架与车体之间的偏差次数太多", h: "1.将AGV打到手动模式 \n2.把AGV在货架下摆正\n3.将AGV按关机旋钮打到OFF,再打到ON重启AGV\n4.恢复自动模式，按RESET键复位，重新上线" },
+            { d: "未按start按钮", h: "检查AGV状态\n①.如AGV未偏离路径地码，按下start按钮，按RESET键复位\n②.如AGV偏离路径地码，按下start按钮，拧钥匙打到手动MANUAL.按RESET键复位，把车推到地图点地码，AGV语音提示\"地码已识别\".拧钥匙打到AUTO.按RESET键复位\n③.如报障无法恢复，对AGV做故障换车，联系HIK处理故障车" },
+            { d: "撞击告警", h: "检查AGV状态\n①.如AGV未偏离路径地码，拍急停按钮清错，拔起急停按钮，按RESET键复位\n②.如AGV偏离路径地码，拧钥匙打到手动MANUAL.按RESET键复位，把车推到地图点地码，AGV语音提示\"地码已识别\".拧钥匙打到AUTO.按RESET键复位\n③.如报障无法恢复，对AGV做故障换车，联系HIK处理故障车" }
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('results');
+
+        // 高亮匹配文本
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(searchTerm, 'gi');
+            return text.replace(regex, match => `<span class="highlight">${match}</span>`);
+        }
+
+        // 执行搜索
+        function performSearch() {
+            const searchTerm = searchInput.value.trim();
+            resultsContainer.innerHTML = '';
+            
+            if (searchTerm === '') {
+                resultsContainer.innerHTML = '<div class="error">请输入搜索内容</div>';
+                return;
+            }
+
+            const filteredData = tableData.filter(item => 
+                item.d.includes(searchTerm)
+            );
+
+            if (filteredData.length === 0) {
+                resultsContainer.innerHTML = '<div class="error">未找到匹配的结果</div>';
+                return;
+            }
+
+            filteredData.forEach(item => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-item';
+                
+                const problemDiv = document.createElement('div');
+                problemDiv.innerHTML = `<strong>问题描述：</strong>${highlightText(item.d, searchTerm)}`;
+                
+                const solutionDiv = document.createElement('div');
+                solutionDiv.innerHTML = `<strong>解决方法：</strong>${item.h.replace(/\n/g, '<br>')}`;
+                
+                resultDiv.appendChild(problemDiv);
+                resultDiv.appendChild(document.createElement('br'));
+                resultDiv.appendChild(solutionDiv);
+                
+                resultsContainer.appendChild(resultDiv);
+            });
+        }
+
+        // 添加输入事件监听器
+        searchInput.addEventListener('input', performSearch);
+
+        // 初始加载显示所有数据
+        window.addEventListener('load', () => {
+            searchInput.value = '';
+            performSearch();
+        });
+    </script>
+</body>
+</html>

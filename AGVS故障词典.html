@@ -14,15 +14,15 @@
 
         body {
             background-color: #f5f5f5;
-            padding: 15px;
             color: #333;
             line-height: 1.6;
-            padding-top: 100px; /* 为固定搜索框留出空间 */
+            padding-top: 120px; /* 为固定头部留出空间 */
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
+            padding: 15px;
         }
 
         .header {
@@ -136,7 +136,7 @@
 
     <script>
         // 表格数据 (D列:问题描述, E列:处理等级, G列:问题原因, H列:解决方法)
-       const tableData = [
+        const tableData = [
   { d: "AGV不在任务下发点位", e: "L1", g: "1.AGV不在调度任务的路径点上", h: "1.拧钥匙打到手动MANUAL2.把车推到地图点地码，AGV语音提示“地码已识别”；\n3.拧钥匙打到AUTO；4.按RESET键复位" },
   { d: "AGV无法执行AGVS下发任务", e: "L1", g: "1.由于AGV定位问题，导致AGVS下发给AGV的任务无法执行", h: "1.拧钥匙打到手动MANUAL2.把车推到地图点地码，AGV语音提示“地码已识别”；\n3.拧钥匙打到AUTO；4.按RESET键复位" },
   { d: "安全回路激光触发", e: "L1", g: "1.物体距离AGV激光头超过阈值\n2.强光照射AGV激光头\n3.硬件故障", h: "1.检查激光头下激光提示灯颜色和AGV的状态\n①绿色状态,AGV未偏离地码，按RESET键复位\n②绿色状态,AGV偏离地码,拧钥匙打到手动MANUAL.把车推到地图点地码，AGV语音提示“地码已识别”.拧钥匙打到AUTO.按RESET键复位\n③红色状态，拧钥匙打到手动MANUAL，把车推到地图点地码，AGV语音提示“地码已识别”，拧钥匙打到AUTO，将AGV按关机旋钮打到OFF,再打到ON重启AGV,按RESET键复位重新上线\n2.若一直还是触发，联系HIK检测相关硬件链路" },

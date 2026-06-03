@@ -2,78 +2,158 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AGVS故障词典</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGVS故障词典 | 科技增强版</title>
     <style>
+        :root {
+            --primary: #00c8ff;
+            --secondary: #8a2be2;
+            --dark: #0a0e17;
+            --darker: #05080f;
+            --text: #e6f7ff;
+            --text-light: #ffffff;
+            --card-bg: rgba(16, 22, 36, 0.7);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
         }
 
         body {
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: var(--darker);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 200, 255, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.15) 0%, transparent 25%),
+                linear-gradient(to bottom, 
+                    rgba(10, 14, 23, 0.9) 0%, 
+                    rgba(5, 8, 15, 0.95) 100%);
+            color: var(--text);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(135deg, 
+                    rgba(0, 200, 255, 0.03) 0%, 
+                    transparent 20%, 
+                    transparent 80%, 
+                    rgba(138, 43, 226, 0.03) 100%),
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(0, 200, 255, 0.02) 0px,
+                    rgba(0, 200, 255, 0.02) 1px,
+                    transparent 1px,
+                    transparent 10px),
+                repeating-linear-gradient(
+                    -45deg,
+                    rgba(138, 43, 226, 0.02) 0px,
+                    rgba(138, 43, 226, 0.02) 1px,
+                    transparent 1px,
+                    transparent 10px);
+            z-index: -1;
         }
 
         .container {
             max-width: 100%;
-            margin: 0 auto;
             padding: 15px;
-            padding-top: 0; /* 移除顶部padding */
+            padding-top: 140px;
         }
 
         .header {
-            position: sticky; /* 改为sticky定位 */
+            position: fixed;
             top: 0;
-            background-color: #f5f5f5;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 23, 0.92);
             padding: 15px;
-            padding-bottom: 10px; /* 减少底部padding */
             z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 5px; /* 增加底部外边距 */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(0, 200, 255, 0.3);
+            backdrop-filter: blur(12px);
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 10px; /* 减少标题下边距 */
-            font-size: 1.4rem; /* 稍微减小字体大小 */
-            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+            color: var(--text-light);
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 12px rgba(0, 200, 255, 0.4);
+            position: relative;
+        }
+
+        h1::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            margin: 8px auto 0;
+            opacity: 0.6;
         }
 
         .search-box {
             position: relative;
+            margin: 0 auto;
+            max-width: 600px;
         }
 
         #searchInput {
             width: 100%;
-            padding: 10px 15px; /* 减小内边距 */
+            padding: 12px 15px;
             font-size: 16px;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(0, 200, 255, 0.5);
             border-radius: 8px;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: rgba(8, 12, 20, 0.6);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.1);
         }
 
         #searchInput:focus {
             outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 5px rgba(52,152,219,0.5);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 200, 255, 0.3);
+            background: rgba(8, 12, 20, 0.8);
+        }
+
+        #searchInput::placeholder {
+            color: rgba(200, 200, 200, 0.6);
         }
 
         .results-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
             overflow: hidden;
-            margin-top: 5px; /* 增加顶部外边距 */
+            margin-top: 15px;
+            backdrop-filter: blur(8px);
+            box-shadow: 
+                0 6px 30px rgba(0, 0, 0, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transform: translateZ(0);
         }
 
         .result-item {
-            padding: 12px 15px; /* 减小内边距 */
-            border-bottom: 1px solid #eee;
+            padding: 18px;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: rgba(0, 200, 255, 0.05);
         }
 
         .result-item:last-child {
@@ -82,41 +162,100 @@
 
         .problem {
             font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 6px; /* 减小下边距 */
-            color: #2c3e50;
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .level {
             display: inline-block;
-            background-color: #3498db;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-right: 8px;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            margin-right: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 200, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0) 60%
+            );
+            transform: rotate(30deg);
         }
 
         .cause, .solution {
-            margin-top: 8px; /* 减小上边距 */
-            font-size: 0.95rem;
+            margin-top: 14px;
+            font-size: 1rem;
         }
 
         .solution {
-            color: #27ae60;
+            color: #7fffd4;
+            padding: 12px;
+            border-left: 3px solid var(--primary);
+            background: rgba(0, 200, 255, 0.08);
+            border-radius: 0 6px 6px 0;
+            position: relative;
+        }
+
+        .solution::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(0, 200, 255, 0.05) 0%,
+                transparent 100%
+            );
+            pointer-events: none;
         }
 
         .no-results {
-            padding: 15px; /* 减小内边距 */
+            padding: 30px;
             text-align: center;
-            color: #7f8c8d;
+            color: rgba(200, 200, 200, 0.7);
+            font-style: italic;
         }
 
         .highlight {
-            background-color: #fff9c4;
+            background: rgba(255, 255, 0, 0.3);
+            color: #ffff00;
+            padding: 0 3px;
+            border-radius: 3px;
             font-weight: bold;
-            padding: 0 2px;
-            border-radius: 2px;
+            text-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding-top: 130px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            #searchInput {
+                padding: 11px 14px;
+            }
         }
     </style>
 </head>
@@ -136,7 +275,7 @@
 
     <script>
         // 表格数据 (D列:问题描述, E列:处理等级, G列:问题原因, H列:解决方法)
-       const tableData = [
+        const tableData = [
   { d: "AGV不在任务下发点位", e: "L1", g: "1.AGV不在调度任务的路径点上", h: "1.拧钥匙打到手动MANUAL2.把车推到地图点地码，AGV语音提示“地码已识别”；\n3.拧钥匙打到AUTO；4.按RESET键复位" },
   { d: "AGV无法执行AGVS下发任务", e: "L1", g: "1.由于AGV定位问题，导致AGVS下发给AGV的任务无法执行", h: "1.拧钥匙打到手动MANUAL2.把车推到地图点地码，AGV语音提示“地码已识别”；\n3.拧钥匙打到AUTO；4.按RESET键复位" },
   { d: "安全回路激光触发", e: "L1", g: "1.物体距离AGV激光头超过阈值\n2.强光照射AGV激光头\n3.硬件故障", h: "1.检查激光头下激光提示灯颜色和AGV的状态\n①绿色状态,AGV未偏离地码，按RESET键复位\n②绿色状态,AGV偏离地码,拧钥匙打到手动MANUAL.把车推到地图点地码，AGV语音提示“地码已识别”.拧钥匙打到AUTO.按RESET键复位\n③红色状态，拧钥匙打到手动MANUAL，把车推到地图点地码，AGV语音提示“地码已识别”，拧钥匙打到AUTO，将AGV按关机旋钮打到OFF,再打到ON重启AGV,按RESET键复位重新上线\n2.若一直还是触发，联系HIK检测相关硬件链路" },
@@ -235,10 +374,12 @@
             data.forEach(item => {
                 html += `
                     <div class="result-item">
-                        <div class="problem">${highlightText(item.d, searchTerm)}</div>
-                        <span class="level">${item.e}</span>
+                        <div class="problem">
+                            <span class="level">${item.e}</span>
+                            ${highlightText(item.d, searchTerm)}
+                        </div>
                         <div class="cause"><strong>原因：</strong>${item.g.replace(/\n/g, '<br>')}</div>
-                        <div class="solution"><strong>解决方法：</strong>${item.h.replace(/\n/g, '<br>')}</div>
+                        <div class="solution"><strong>解决方案：</strong>${item.h.replace(/\n/g, '<br>')}</div>
                     </div>
                 `;
             });
